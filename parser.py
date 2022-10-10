@@ -1,18 +1,20 @@
 #This python project is a learning experience 
+#Please note that although I could have used
+#pip - python-docx, it would've changed the entire
+#way this was coded. With this code, imports can be made to
+#alternative types of text documents such as .txt and .pdf
 
-
-from fileinput import lineno
+from encodings import utf_8
 from html.parser import HTMLParser
-
 import unicodedata
 import codecs
 import os
-from xml.dom.pulldom import CHARACTERS
+from docx import Document
 
+coding: utf_8
 
-
-newfilename = input("Enter the desired name of your Word document: ")
-
+newfilename = input("Enter the desired name of your document: ")
+concat = input("What file type do you wish to create?")
 #note that the pc parser is not necessary with the newly improved ios version
 
 class parseHTMLDataPC(HTMLParser):
@@ -23,21 +25,45 @@ class parseHTMLDataPC(HTMLParser):
         if (tag) == 'p':
 
             (line1, column) = self.getpos()
-
+    
     def handle_data(self, data):
         newFilePath = os.path.abspath(newfilename)
-        newSave = open(newFilePath + ".doc", "a")
-        (line, column) = self.getpos()
-        #notion documents end css formatting before line 668
-        #greater than line 668, the document data is found
         
-        if line > 668:
+        newList = []
+        if concat == ".docx":
+            doc = Document()
+          
+            (line, column) = self.getpos()
+            if line > 668:
+                doc.add_heading(newfilename)
+                
+                for n in data:
+                    newList.append(n)
+                i = 0
+                listLength = len(newList)
+                while i < listLength:
+                    doc.add_paragraph(newList[i].encode('ascii', 'ignore').decode())
+                    
+                    i += 1
+                
+                
+             
+            #newSave = open(newFilePath + concat, "a")
+            doc.save(newFilePath + concat)
+            
+        else:
+            newSave = open(newFilePath + ".doc", "a")
+            (line, column) = self.getpos()
+            #notion documents end css formatting before line 668
+            #greater than line 668, the document data is found
+            
+            if line > 668:
 
-            #adds a tab to the beginning of each newline
-            newSave.writelines("\t" + data + "\n")
+                #adds a tab to the beginning of each newline
+                newSave.writelines("\t" + data + "\n")
 
-        newSave.flush()  
-        newSave.close()
+            newSave.flush()  
+            newSave.close()
 
 
 
@@ -52,8 +78,8 @@ class parseHTMLDataiOS(HTMLParser):
 
         newFilePath = os.path.abspath(newfilename)
 
-        newSave = open(newFilePath + ".doc", "a")
-        
+        #newSave = open(newFilePath + ".docx", "a")
+        newSave = open(newFilePath + concat, "a", encoding="utf-8")
         (line, column) = self.getpos()
         newlineType = '\n'
         tabType = "\t"
