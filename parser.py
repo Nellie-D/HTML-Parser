@@ -1,83 +1,46 @@
-#This python project is a learning experience 
-#Please note that although I could have used
-#pip - python-docx, it would've changed the entire
-#way this was coded. With this code, imports can be made to
-#alternative types of text documents such as .txt and .pdf
+#This python project was built as a personal project. 
+# As a student and hobbyist writer, I frequently write documents
+# on the cloud using the Notion app, which syncs across my devices.
+# However, I discovered that copy/paste from Notion to Word or Google Docs
+# would cause unwanted formatting changes.
+# This code handles a Notion HTML import and parses the code for text contents.
+# Once parsed, the handler saves the data to a .doc or .txt file based on user choice.
+
 
 from encodings import utf_8
 from html.parser import HTMLParser
-import unicodedata
 import codecs
 import os
-from docx import Document
-
 coding: utf_8
 
 newfilename = input("Enter the desired name of your document: ")
-concat = input("What file type do you wish to create?")
-#note that the pc parser is not necessary with the newly improved ios version
+print("What file type do you wish to create?")
+concat = input("Please choose .txt or .doc: ")
 
-class parseHTMLDataPC(HTMLParser):
-    
-    def handle_starttag(self, tag, attrs):
-      #  print("Encountered a tag:", tag)
-        
-        if (tag) == 'p':
+textType = ".txt"
+docType = ".doc"
 
-            (line1, column) = self.getpos()
-    
-    def handle_data(self, data):
-        newFilePath = os.path.abspath(newfilename)
-        
-        newList = []
-        if concat == ".docx":
-            doc = Document()
-          
-            (line, column) = self.getpos()
-            if line > 668:
-                doc.add_heading(newfilename)
-                
-                for n in data:
-                    newList.append(n)
-                i = 0
-                listLength = len(newList)
-                while i < listLength:
-                    doc.add_paragraph(newList[i].encode('ascii', 'ignore').decode())
-                    
-                    i += 1
-                
-                
-             
-            #newSave = open(newFilePath + concat, "a")
-            doc.save(newFilePath + concat)
-            
-        else:
-            newSave = open(newFilePath + ".doc", "a")
-            (line, column) = self.getpos()
-            #notion documents end css formatting before line 668
-            #greater than line 668, the document data is found
-            
-            if line > 668:
-
-                #adds a tab to the beginning of each newline
-                newSave.writelines("\t" + data + "\n")
-
-            newSave.flush()  
-            newSave.close()
-
-
+if concat != textType:
+    if concat != docType:
+        print("Invalid filetype.")
+        concat = input("Please choose .txt or .doc")
+    else:
+        concat = docType
+else: 
+    concat = textType
 
 class parseHTMLDataiOS(HTMLParser):
     
     def handle_starttag(self, tag, attrs):
-        print("Encountered a tag:", tag)
+        #print("Encountered a tag:", tag)
+
         if (tag) == 'p':
             (line1, column) = self.getpos()
            
+
     def handle_data(self, data):
 
         newFilePath = os.path.abspath(newfilename)
-
         #newSave = open(newFilePath + ".docx", "a")
         newSave = open(newFilePath + concat, "a", encoding="utf-8")
         (line, column) = self.getpos()
@@ -86,7 +49,6 @@ class parseHTMLDataiOS(HTMLParser):
         myDataList = []
         
         if line > 668:
-            
              
             for n in data:
             
@@ -98,7 +60,7 @@ class parseHTMLDataiOS(HTMLParser):
             if newlineType in myDataList and tabType not in myDataList:
                 #returns true
                 newLineIndex = myDataList.index(newlineType)
-                print(newLineIndex)
+                #print(newLineIndex)
                 paragraphStartIndex = newLineIndex + 1
                 myDataList.insert(paragraphStartIndex, "\t")
               
@@ -114,37 +76,25 @@ class parseHTMLDataiOS(HTMLParser):
                     myDataList.append("\n")
                 else: 
                     myDataList.append("\n")
-                print(False)
+                #print(False)
 
-            print(myDataList)
+            #print(myDataList)
             newSave.writelines(myDataList)
-                    
-                        
+                      
             
         newSave.flush()
         newSave.close()
 
 def main(): 
 
-    importType = float(input("Was your document written on PC(1) or on iOS(2) device?"))
     downloadedFile = input("Enter the name of the exported file: ")
     
     myStore = downloadedFile
     downloadPath = os.path.abspath(myStore)
     f = codecs.open(downloadPath, encoding="utf8")
 
-
-    if importType == 1:
-        parserprint = parseHTMLDataPC()
-        parserprint.feed(f.read())
-    elif importType == 2:
-        parserprint = parseHTMLDataiOS()
-        parserprint.feed(f.read())
-    else:
-        print("Invalid entry: " + importType)
-        
-
-    
+    parserprint = parseHTMLDataiOS()
+    parserprint.feed(f.read())
     parserprint.close()
     f.close()
     
